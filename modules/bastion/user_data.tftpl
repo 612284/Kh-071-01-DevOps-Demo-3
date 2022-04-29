@@ -1,0 +1,6 @@
+#!/bin/bash
+cat <<EOF>/home/ec2-user/.ssh/id_rsa
+${private_key_pem}
+EOF
+chmod 400 /home/ec2-user/.ssh/id_rsa
+chown ec2-user:ec2-user /home/ec2-user/.ssh/id_rsa
