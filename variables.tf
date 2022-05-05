@@ -9,24 +9,6 @@ variable "cidr" {
   type        = string
   default     = "0.0.0.0/0"
 }
-
-variable "public_subnets" {
-  description = "A list of public subnets inside the VPC"
-  type        = list(string)
-  default     = []
-}
-
-variable "private_subnets" {
-  description = "A list of private subnets inside the VPC"
-  type        = list(string)
-  default     = []
-}
-
-variable "azs" {
-  description = "A list of availability zones names or ids in the region"
-  type        = list(string)
-  default     = []
-}
 variable "instance_type" {
   description = "instance_type"
   type        = string
@@ -65,4 +47,18 @@ variable "app_tag" {
   description = "app tag"
   type        = string
   default     = ""
+}
+variable "public_subnets_map" {
+  description = "public subnets map"
+  type = map(object({
+    az   = string
+    cidr = string
+  }))
+}
+variable "private_subnets_map" {
+  description = "private subnets map"
+  type = map(object({
+    az   = string
+    cidr = string
+  }))
 }

@@ -5,7 +5,6 @@ resource "aws_instance" "bastion" {
   subnet_id              = var.public_subnets_id[0]
   vpc_security_group_ids = [aws_security_group.bastion_sg.id]
   user_data              = data.template_file.user_data.rendered
-  # private_ip           = "10.0.101.100"
   tags = {
     Name = "bastion"
   }
@@ -29,12 +28,7 @@ resource "aws_security_group" "bastion_sg" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
   egress {
     from_port   = 0
     to_port     = 0

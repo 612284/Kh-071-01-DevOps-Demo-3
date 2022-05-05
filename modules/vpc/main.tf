@@ -15,50 +15,51 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# resource "aws_eip" "nat_eip" {
-#   count = length(var.private_subnets)
-#
-#   vpc = true
-# }
+resource "aws_eip" "nat_eip" {
+  for_each = var.private_subnets_map
 
-# resource "aws_nat_gateway" "nat" {
-#   count = length(var.private_subnets)
-#
-#   allocation_id = element(aws_eip.nat_eip.*.id, count.index)
-#   subnet_id     = element(aws_subnet.public.*.id, count.index)
-#
-#   tags = {
-#     Name = format("NAT for -%s", element(var.azs, count.index))
-#   }
-# }
+  vpc = true
+}
+
+resource "aws_nat_gateway" "nat" {
+  for_each = var.private_subnets_map
+
+  allocation_id = aws_eip.nat_eip[each.key].id
+  subnet_id     = aws_subnet.public[each.key].id
+
+  tags = {
+    Name = format("NAT for -%s", each.value["az"])
+  }
+}
 
 resource "aws_subnet" "public" {
-  count = length(var.public_subnets)
+  for_each = var.public_subnets_map
 
   vpc_id                  = aws_vpc.this.id
-  cidr_block              = element(var.public_subnets, count.index)
-  availability_zone       = element(var.azs, count.index)
+  cidr_block              = each.value["cidr"]
+  availability_zone       = each.value["az"]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = format("public subnet in -%s", element(var.azs, count.index))
+    Name = format("public subnet in -%s", each.value["az"])
   }
 }
 
 resource "aws_subnet" "private" {
-  count = length(var.private_subnets)
+  for_each = var.private_subnets_map
 
   vpc_id            = aws_vpc.this.id
-  cidr_block        = element(var.private_subnets, count.index)
-  availability_zone = element(var.azs, count.index)
+  cidr_block        = each.value["cidr"]
+  availability_zone = each.value["az"]
 
   tags = {
-    Name = format("private subnet in -%s", element(var.azs, count.index))
+    Name = format("private subnet in -%s", each.value["az"])
   }
 }
 
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
+  for_each = var.public_subnets_map
+  vpc_id   = aws_vpc.this.id
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -71,29 +72,29 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table" "private" {
-  count  = length(var.private_subnets)
-  vpc_id = aws_vpc.this.id
+  for_each = var.private_subnets_map
+  vpc_id   = aws_vpc.this.id
 
-  # route {
-  #   cidr_block = "0.0.0.0/0"
-  #   gateway_id = element(aws_nat_gateway.nat.*.id, count.index)
-  # }
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat[each.key].id
+  }
 
   tags = {
-    Name = format("private route table in -%s", element(var.azs, count.index))
+    Name = format("private route table in -%s", each.value["az"])
   }
 }
 
 resource "aws_route_table_association" "custom-rtb-public-subnet" {
-  count = length(var.public_subnets)
+  for_each = var.public_subnets_map
 
-  route_table_id = aws_route_table.public.id
-  subnet_id      = aws_subnet.public.*.id[count.index]
+  route_table_id = aws_route_table.public[each.key].id
+  subnet_id      = aws_subnet.public[each.key].id
 }
 
 resource "aws_route_table_association" "custom-rtb-private-subnet" {
-  count = length(var.private_subnets)
+  for_each = var.private_subnets_map
 
-  route_table_id = aws_route_table.private.*.id[count.index]
-  subnet_id      = aws_subnet.private.*.id[count.index]
+  route_table_id = aws_route_table.private[each.key].id
+  subnet_id      = aws_subnet.private[each.key].id
 }

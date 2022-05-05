@@ -1,24 +1,19 @@
-# resource "aws_kms_key" "example" {
-#   description             = "example"
-#   deletion_window_in_days = 7
-# }
-#
-# resource "aws_cloudwatch_log_group" "example" {
-#   name = "example"
-# }
-
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = "my-cluster"
+}
 
-  # configuration {
-  #   execute_command_configuration {
-  #     kms_key_id = aws_kms_key.example.arn
-  #     logging    = "OVERRIDE"
-  #
-  #     log_configuration {
-  #       cloud_watch_encryption_enabled = true
-  #       cloud_watch_log_group_name     = aws_cloudwatch_log_group.example.name
-  #     }
-  #   }
-  # }
+resource "aws_ecs_service" "worker" {
+  name                               = "worker"
+  cluster                            = aws_ecs_cluster.ecs_cluster.id
+  task_definition                    = aws_ecs_task_definition.task_definition.arn
+  desired_count                      = 4
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+  force_new_deployment               = true
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.asg-target-group.arn
+    container_name   = aws_ecs_task_definition.task_definition.family
+    container_port   = 5000
+  }
 }

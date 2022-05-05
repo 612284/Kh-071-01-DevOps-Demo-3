@@ -3,7 +3,6 @@ variable "public_subnets_id" {
   type        = list(string)
   default     = []
 }
-
 variable "private_subnets_id" {
   description = "A list of private subnets id inside the VPC"
   type        = list(string)
@@ -15,6 +14,10 @@ variable "vpc_id" {
   default     = ""
 }
 variable "sg_alb_ingress_ports" {
+  type    = list(string)
+  default = []
+}
+variable "sg_asg_ingress_ports" {
   type    = list(string)
   default = []
 }

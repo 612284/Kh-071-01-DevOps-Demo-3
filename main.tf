@@ -2,16 +2,13 @@ provider "aws" {
   region = var.region
 }
 
-
 module "vpc" {
   source = "./modules/vpc"
 
-  cidr            = var.cidr
-  azs             = var.azs
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
+  cidr                = var.cidr
+  private_subnets_map = var.private_subnets_map
+  public_subnets_map  = var.public_subnets_map
 }
-
 
 module "bastion" {
   source = "./modules/bastion"
@@ -34,6 +31,7 @@ module "key" {
 module "ecr" {
   source = "./modules/ecr"
 }
+
 module "claster" {
   source               = "./modules/claster"
   vpc_id               = module.vpc.vpc_id
@@ -44,6 +42,7 @@ module "claster" {
   amason_linyx_ami     = data.aws_ami.latest_amason_linyx.id
   app_tag              = var.app_tag
   sg_alb_ingress_ports = var.sg_alb_ingress_ports
+  sg_asg_ingress_ports = var.sg_asg_ingress_ports
   instance_type        = var.instance_type
   depends_on           = [module.ecr, module.local_build, module.vpc]
 }

@@ -1,12 +1,3 @@
-# resource "aws_launch_configuration" "ecs_launch_config" {
-#   image_id             = var.amason_linyx_ami
-#   iam_instance_profile = aws_iam_instance_profile.ecs_agent.name
-#   security_groups      = [aws_security_group.worker.id]
-#   user_data            = "#!/bin/bash\necho ECS_CLUSTER=my-cluster >> /etc/ecs/ecs.config"
-#   key_name             = "aws-frakfurt"
-#   instance_type        = "t2.micro"
-# }
-
 resource "aws_launch_template" "worker_template" {
   name                    = "worker-template"
   disable_api_termination = false
@@ -23,9 +14,8 @@ resource "aws_launch_template" "worker_template" {
 }
 
 resource "aws_autoscaling_group" "ecs_asg" {
-  name                = "asg"
-  vpc_zone_identifier = var.public_subnets_id
-  # launch_configuration = aws_launch_configuration.ecs_launch_config.name
+  name                      = "asg"
+  vpc_zone_identifier       = var.private_subnets_id
   desired_capacity          = 2
   min_size                  = 2
   max_size                  = 2
@@ -45,20 +35,15 @@ resource "aws_autoscaling_group" "ecs_asg" {
 resource "aws_security_group" "worker" {
   vpc_id = var.vpc_id
   name   = "worker security group"
-  # dynamic "ingress" {
-  #   for_each = [22, 80, 5000]
-  #   content {
-  #     from_port   = ingress.value
-  #     to_port     = ingress.value
-  #     protocol    = "tcp"
-  #     cidr_blocks = ["0.0.0.0/0"]
-  #   }
-  # }
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+
+  dynamic "ingress" {
+    for_each = var.sg_asg_ingress_ports
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
   egress {
     from_port   = 0

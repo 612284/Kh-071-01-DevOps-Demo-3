@@ -13,7 +13,6 @@ variable "registry_id" {
   type        = string
   default     = ""
 }
-
 variable "github_url" {
   description = "github url"
   type        = string
