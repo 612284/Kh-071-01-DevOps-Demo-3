@@ -1,6 +1,6 @@
-﻿It is a simple AWS VPC, built by Terraform with ECR and ECS
+# It is a simple AWS VPC, built by Terraform with ECR and ECS
 
-There is contained:
+### project contains:
 
 - 2 public subnets
 - 2 private subnets
@@ -12,8 +12,16 @@ There is contained:
 - ECR and ECS
 
 ![](img/Aspose.Words.590efbc6-30d3-4508-b182-49c0c6302455.001.png)
+
+### security group
+
 ![](img/Aspose.Words.590efbc6-30d3-4508-b182-49c0c6302455.002.png)
+
+### ECR and ECS
+
 ![](img/Aspose.Words.590efbc6-30d3-4508-b182-49c0c6302455.003.png)
+
+### for run you need:
 
 1 installed terraform, git and docker
 2 clone this repository
