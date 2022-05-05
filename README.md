@@ -24,6 +24,7 @@
 ### for run you need:
 
 1 installed terraform, git and docker
+
 2 clone this repository
 ```
 git clone <https://github.com/612284/Kh-071-01-DevOps-Demo-3.git>
